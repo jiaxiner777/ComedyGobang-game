@@ -1,0 +1,52 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code Breaker</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">算法肉鸽入侵界面</p>
+          <h1>Code Breaker</h1>
+          <p class="lede">在浏览器中潜入 The Kernel，用算法脚本改写敌人的内存数组，最终重写 Root。</p>
+        </div>
+        <div class="hero-actions">
+          <label class="protocol-picker">
+            <span>遍历协议</span>
+            <select id="protocol">
+              <option value="preorder">前序遍历</option>
+              <option value="postorder">后序遍历</option>
+            </select>
+          </label>
+          <button id="new-game" class="primary">执行新线程</button>
+          <button id="open-library" class="secondary">全卡图鉴</button>
+          <button id="open-help" class="secondary">术语帮助</button>
+          <button id="open-guide" class="secondary">新手引导</button>
+        </div>
+      </header>
+
+      <main id="app" class="app-grid">
+        <section class="panel intro-panel">
+          <h2>正在载入</h2>
+        </section>
+      </main>
+    </div>
+
+    <div id="overlay" class="overlay hidden">
+      <div class="overlay-backdrop" data-close-overlay="true"></div>
+      <section class="overlay-panel">
+        <div class="overlay-head">
+          <h2 id="overlay-title">面板</h2>
+          <button id="close-overlay" class="secondary">关闭</button>
+        </div>
+        <div id="overlay-content" class="overlay-content"></div>
+      </section>
+    </div>
+
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

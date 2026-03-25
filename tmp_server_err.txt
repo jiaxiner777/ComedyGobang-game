@@ -1,0 +1,27 @@
+2026/03/20 17:26:24 Code Breaker web server listening on http://localhost:8104
+2026/03/20 17:26:27 http: panic serving 127.0.0.1:52201: load card library: invalid character 'ï' looking for beginning of value
+goroutine 7 [running]:
+net/http.(*conn).serve.func1()
+	D:/Program Files/Go/src/net/http/server.go:1947 +0xbe
+panic({0x4331c0?, 0xc000092100?})
+	D:/Program Files/Go/src/runtime/panic.go:792 +0x132
+codebreaker/internal/game.mustConfigureCardLibrary()
+	D:/work/codeplay/CodeBreaker-game/internal/game/card_pool.go:81 +0x4e
+codebreaker/internal/game.NewGame(0xc00008c2d0, {0x515640, 0xc0000920e0}, {0x515d00, 0x788940})
+	D:/work/codeplay/CodeBreaker-game/internal/game/types.go:194 +0x4a
+codebreaker/internal/game.NewHeadlessGame(0xc00008c2d0)
+	D:/work/codeplay/CodeBreaker-game/internal/game/types.go:211 +0x49
+codebreaker/internal/game.(*GameService).Create(0xc00005c7a0, {0xc00008a0d8, 0x8})
+	D:/work/codeplay/CodeBreaker-game/internal/game/service.go:164 +0x146
+codebreaker/internal/api.(*Server).handleSessionCreate(0xc000058158, {0x517d80, 0xc0000b8000}, 0xc00009c000)
+	D:/work/codeplay/CodeBreaker-game/internal/api/server.go:52 +0x19e
+net/http.HandlerFunc.ServeHTTP(0xc000114840?, {0x517d80?, 0xc0000b8000?}, 0xc00002bb60?)
+	D:/Program Files/Go/src/net/http/server.go:2294 +0x29
+net/http.(*ServeMux).ServeHTTP(0x125b05?, {0x517d80, 0xc0000b8000}, 0xc00009c000)
+	D:/Program Files/Go/src/net/http/server.go:2822 +0x1c4
+net/http.serverHandler.ServeHTTP({0x5168f8?}, {0x517d80?, 0xc0000b8000?}, 0x1?)
+	D:/Program Files/Go/src/net/http/server.go:3301 +0x8e
+net/http.(*conn).serve(0xc000126240, {0x518168, 0xc000021380})
+	D:/Program Files/Go/src/net/http/server.go:2102 +0x625
+created by net/http.(*Server).Serve in goroutine 1
+	D:/Program Files/Go/src/net/http/server.go:3454 +0x485

@@ -1,0 +1,838 @@
+{
+    "activePoolSize":  20,
+    "requiredGroups":  [
+                           {
+                               "id":  "initial",
+                               "min":  5,
+                               "tags":  [
+                                            "initial"
+                                        ]
+                           },
+                           {
+                               "id":  "constant",
+                               "min":  3,
+                               "complexities":  [
+                                                    "O(1)"
+                                                ]
+                           },
+                           {
+                               "id":  "maintenance",
+                               "min":  2,
+                               "tags":  [
+                                            "maintenance"
+                                        ]
+                           },
+                           {
+                               "id":  "rare",
+                               "min":  3,
+                               "tags":  [
+
+                                        ],
+                               "complexities":  [
+
+                                                ]
+                           }
+                       ],
+    "cards":  [
+                  {
+                      "id":  "reverse_list.py",
+                      "name":  "reverse_list.py",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "翻转敌方可移动区。若敌人锁定了前缀位，这些位不会被翻动。",
+                      "starter":  true,
+                      "source":  "initial",
+                      "tags":  [
+                                   "initial",
+                                   "manipulation"
+                               ],
+                      "reusable":  true
+                  },
+                  {
+                      "id":  "bubble_sort.sh",
+                      "name":  "bubble_sort.sh",
+                      "cost":  4,
+                      "complexity":  "O(n^2)",
+                      "text":  "仅对敌方前 4 个可移动 bit 进行冒泡排序，并让敌人下次行动延后 2 回合。",
+                      "starter":  true,
+                      "source":  "initial",
+                      "tags":  [
+                                   "initial",
+                                   "sort",
+                                   "control"
+                               ],
+                      "excludes":  [
+                                       "quick_sort.rs"
+                                   ],
+                      "mutexGroups":  [
+                                          "ultra_sort"
+                                      ]
+                  },
+                  {
+                      "id":  "binary_search.go",
+                      "name":  "binary_search.go",
+                      "cost":  2,
+                      "complexity":  "O(log n)",
+                      "text":  "若敌方可移动 bits 已有序，则清空当前攻击签名；否则抽 1 张牌。",
+                      "starter":  true,
+                      "source":  "initial",
+                      "tags":  [
+                                   "initial",
+                                   "precision"
+                               ]
+                  },
+                  {
+                      "id":  "quick_sort.rs",
+                      "name":  "quick_sort.rs",
+                      "cost":  5,
+                      "complexity":  "O(n log n)",
+                      "text":  "对敌方可移动区进行快速排序（升序），并让敌人下次行动延后 1 回合。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "sort",
+                                   "control"
+                               ],
+                      "excludes":  [
+                                       "bubble_sort.sh"
+                                   ],
+                      "mutexGroups":  [
+                                          "ultra_sort"
+                                      ]
+                  },
+                  {
+                      "id":  "backtrack.ts",
+                      "name":  "backtrack.ts",
+                      "cost":  3,
+                      "complexity":  "O(branch^depth)",
+                      "text":  "回滚到上一回合开始时的系统状态：恢复玩家生命、MP、负载与敌方 bits，但不回滚手牌、抽牌堆与弃牌堆。",
+                      "starter":  true,
+                      "source":  "initial",
+                      "tags":  [
+                                   "initial",
+                                   "utility"
+                               ],
+                      "excludes":  [
+                                       "memoize.lua"
+                                   ],
+                      "mutexGroups":  [
+                                          "value_loop"
+                                      ]
+                  },
+                  {
+                      "id":  "heap_alloc.cpp",
+                      "name":  "heap_alloc.cpp",
+                      "cost":  1,
+                      "complexity":  "O(1)",
+                      "text":  "扩容堆区：恢复 2 点 MP，并抽 1 张牌。",
+                      "starter":  true,
+                      "source":  "initial",
+                      "tags":  [
+                                   "initial",
+                                   "maintenance",
+                                   "resource"
+                               ],
+                      "reusable":  true
+                  },
+                  {
+                      "id":  "null_pointer.exe",
+                      "name":  "null_pointer.exe",
+                      "cost":  2,
+                      "complexity":  "O(1)",
+                      "text":  "若敌方仍有护甲则将其归零，否则直接造成 5 点完整度伤害。",
+                      "starter":  true,
+                      "source":  "initial",
+                      "tags":  [
+                                   "initial",
+                                   "finisher"
+                               ],
+                      "mutexGroups":  [
+                                          "burst_zero"
+                                      ],
+                      "reusable":  true
+                  },
+                  {
+                      "id":  "merge_patch.diff",
+                      "name":  "merge_patch.diff",
+                      "cost":  3,
+                      "complexity":  "O(n)",
+                      "text":  "交错合并敌方可移动区，并造成 3 点穿透伤害。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "manipulation",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "radix_sort.java",
+                      "name":  "radix_sort.java",
+                      "cost":  4,
+                      "complexity":  "O(n*k)",
+                      "text":  "用稳定的基数排序整理敌方可移动区，熵值 -3，并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "sort",
+                                   "control"
+                               ],
+                      "mutexGroups":  [
+                                          "ultra_sort"
+                                      ]
+                  },
+                  {
+                      "id":  "xor_mask.asm",
+                      "name":  "xor_mask.asm",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "用掩码 3 对敌方攻击、护甲、脚本与熵值做 XOR，打乱战术槽位。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "disrupt"
+                               ]
+                  },
+                  {
+                      "id":  "memoize.lua",
+                      "name":  "memoize.lua",
+                      "cost":  1,
+                      "complexity":  "O(1)",
+                      "text":  "将弃牌堆里最近一张可用脚本复制回手牌。",
+                      "starter":  true,
+                      "source":  "initial",
+                      "tags":  [
+                                   "initial",
+                                   "maintenance",
+                                   "utility"
+                               ],
+                      "excludes":  [
+                                       "backtrack.ts"
+                                   ],
+                      "mutexGroups":  [
+                                          "value_loop"
+                                      ]
+                  },
+                  {
+                      "id":  "checksum.py",
+                      "name":  "checksum.py",
+                      "cost":  1,
+                      "complexity":  "O(n)",
+                      "text":  "计算 bits 校验和。若总和为偶数则直伤 4 点，否则抽 2 张牌并写入 1 张 overflow_error.log。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "draw",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "pivot_swap.rb",
+                      "name":  "pivot_swap.rb",
+                      "cost":  2,
+                      "complexity":  "O(1)",
+                      "text":  "交换敌方攻击槽与护甲槽。若敌人正在蓄力，则额外延后 1 个计时。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "control"
+                               ]
+                  },
+                  {
+                      "id":  "defrag_gc.cs",
+                      "name":  "defrag_gc.cs",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "稀有清理牌：清除 1 张垃圾卡，当前负载 -2，并恢复 2 点生命。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "maintenance",
+                                   "cleanup",
+                                   "heal"
+                               ],
+                      "mutexGroups":  [
+                                          "hard_cleanse"
+                                      ]
+                  },
+                  {
+                      "id":  "greedy_path.kt",
+                      "name":  "greedy_path.kt",
+                      "cost":  3,
+                      "complexity":  "O(n)",
+                      "text":  "锁定敌方最大非生命槽位并抽取其数值，造成一半的直接伤害。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "memory_leak.bin",
+                      "name":  "memory_leak.bin",
+                      "cost":  0,
+                      "complexity":  "O(1)",
+                      "text":  "诅咒卡。无法打出；只要留在手里，每回合都会额外增加 1 点系统负载。",
+                      "starter":  false,
+                      "unplayable":  true,
+                      "source":  "curse",
+                      "tags":  [
+                                   "curse"
+                               ]
+                  },
+                  {
+                      "id":  "overflow_error.log",
+                      "name":  "overflow_error.log",
+                      "cost":  0,
+                      "complexity":  "O(1)",
+                      "text":  "垃圾卡。打出后抽 1 张牌，但会额外增加 1 点待结算负载。",
+                      "starter":  false,
+                      "source":  "curse",
+                      "tags":  [
+                                   "curse",
+                                   "garbage"
+                               ]
+                  },
+                  {
+                      "id":  "noop.log",
+                      "name":  "noop.log",
+                      "cost":  0,
+                      "complexity":  "O(0)",
+                      "text":  "废卡，只会在日志里留下一个没有意义的 Success。本牌不计入栈溢出计数。",
+                      "starter":  true,
+                      "source":  "initial",
+                      "tags":  [
+                                   "initial",
+                                   "maintenance",
+                                   "garbage"
+                               ]
+                  },
+                  {
+                      "id":  "fft_scan.m",
+                      "name":  "fft_scan.m",
+                      "cost":  3,
+                      "complexity":  "O(n log n)",
+                      "text":  "扫描敌方波形。若可移动区已近似有序，则造成 7 点穿透伤害；否则熵值 -3，并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "precision",
+                                   "control"
+                               ],
+                      "mutexGroups":  [
+                                          "ultra_sort"
+                                      ]
+                  },
+                  {
+                      "id":  "cache_prefetch.c",
+                      "name":  "cache_prefetch.c",
+                      "cost":  1,
+                      "complexity":  "O(1)",
+                      "text":  "预热缓存：恢复 1 点 MP，并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "maintenance",
+                                   "resource"
+                               ]
+                  },
+                  {
+                      "id":  "mutex_lock.h",
+                      "name":  "mutex_lock.h",
+                      "cost":  2,
+                      "complexity":  "O(1)",
+                      "text":  "加锁敌方线程：攻击 -2，并让其下次行动延后 1 回合。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "control"
+                               ],
+                      "mutexGroups":  [
+                                          "hard_stall"
+                                      ]
+                  },
+                  {
+                      "id":  "linked_splice.js",
+                      "name":  "linked_splice.js",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "重接敌方相邻节点顺序，并造成 3 点改写伤害。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "manipulation",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "segment_tree.cc",
+                      "name":  "segment_tree.cc",
+                      "cost":  4,
+                      "complexity":  "O(log n)",
+                      "text":  "锁定敌方最高的关键战术位，使其减少当前值的 1/3，至少减少 2，并造成 2 点穿透伤害。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "precision",
+                                   "finisher"
+                               ],
+                      "mutexGroups":  [
+                                          "burst_zero"
+                                      ]
+                  },
+                  {
+                      "id":  "lazy_prop.sql",
+                      "name":  "lazy_prop.sql",
+                      "cost":  2,
+                      "complexity":  "O(log n)",
+                      "text":  "延迟传播错误状态：敌人行动延后 1 回合，脚本值 -2。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "control"
+                               ]
+                  },
+                  {
+                      "id":  "union_find.swift",
+                      "name":  "union_find.swift",
+                      "cost":  1,
+                      "complexity":  "O(log n)",
+                      "text":  "整理本地碎片：待结算负载 -1，恢复 1 点生命，并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "maintenance",
+                                   "utility"
+                               ]
+                  },
+                  {
+                      "id":  "topo_sort.hs",
+                      "name":  "topo_sort.hs",
+                      "cost":  3,
+                      "complexity":  "O(n)",
+                      "text":  "对敌方可移动区做拓扑式整理，并让其行动延后 1 回合。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "sort",
+                                   "control"
+                               ],
+                      "mutexGroups":  [
+                                          "ultra_sort"
+                                      ]
+                  },
+                  {
+                      "id":  "dijkstra_route.ex",
+                      "name":  "dijkstra_route.ex",
+                      "cost":  3,
+                      "complexity":  "O(n log n)",
+                      "text":  "沿最短路径刺入敌方最脆弱的战术槽位，造成穿透伤害并延后其行动。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "precision",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "bfs_queue.dart",
+                      "name":  "bfs_queue.dart",
+                      "cost":  1,
+                      "complexity":  "O(n)",
+                      "text":  "广度扫描：令敌人下次行动延后 1 回合。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "draw",
+                                   "control"
+                               ]
+                  },
+                  {
+                      "id":  "dfs_probe.fs",
+                      "name":  "dfs_probe.fs",
+                      "cost":  1,
+                      "complexity":  "O(n)",
+                      "text":  "深度探针：造成 3 点伤害并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "draw",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "rolling_hash.pl",
+                      "name":  "rolling_hash.pl",
+                      "cost":  1,
+                      "complexity":  "O(n)",
+                      "text":  "滚动哈希敌方可移动区。若结果为偶数则造成穿透伤害并抽牌；否则削减护甲与熵值。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "precision",
+                                   "draw"
+                               ]
+                  },
+                  {
+                      "id":  "lru_cache.zig",
+                      "name":  "lru_cache.zig",
+                      "cost":  2,
+                      "complexity":  "O(1)",
+                      "text":  "回收最近最少使用缓存：从弃牌堆取回一张低费脚本，并恢复 1 点 MP。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "maintenance",
+                                   "utility"
+                               ],
+                      "mutexGroups":  [
+                                          "value_loop"
+                                      ]
+                  },
+                  {
+                      "id":  "bitshift_gate.v",
+                      "name":  "bitshift_gate.v",
+                      "cost":  1,
+                      "complexity":  "O(1)",
+                      "text":  "对敌方攻击位与脚本位执行右移压缩，并令熵值 -1。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "disrupt",
+                                   "control"
+                               ]
+                  },
+                  {
+                      "id":  "stack_unwind.mm",
+                      "name":  "stack_unwind.mm",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "栈展开：待结算负载 -2，恢复 1 点 MP，并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "maintenance",
+                                   "resource"
+                               ]
+                  },
+                  {
+                      "id":  "branch_predictor.clj",
+                      "name":  "branch_predictor.clj",
+                      "cost":  2,
+                      "complexity":  "O(1)",
+                      "text":  "预测上一张已执行的脚本，将其复制到手牌，然后抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "utility",
+                                   "draw"
+                               ],
+                      "mutexGroups":  [
+                                          "value_loop"
+                                      ]
+                  },
+                  {
+                      "id":  "trie_probe.php",
+                      "name":  "trie_probe.php",
+                      "cost":  1,
+                      "complexity":  "O(log n)",
+                      "text":  "检索重复前缀。若找到重复 bit，则造成穿透伤害；否则抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "precision",
+                                   "draw"
+                               ]
+                  },
+                  {
+                      "id":  "sparse_table.r",
+                      "name":  "sparse_table.r",
+                      "cost":  2,
+                      "complexity":  "O(1)",
+                      "text":  "稀疏查询：直接造成 4 点穿透伤害，并略微降低敌方熵值。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "precision",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "bloom_filter.pm",
+                      "name":  "bloom_filter.pm",
+                      "cost":  1,
+                      "complexity":  "O(n)",
+                      "text":  "快速筛查敌方脚本：攻击 -2、脚本 -1，并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "disrupt",
+                                   "draw"
+                               ]
+                  },
+                  {
+                      "id":  "cycle_detect.sc",
+                      "name":  "cycle_detect.sc",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "若敌方可移动区失序，则攻击 -3 并延后 1 回合；若已稳定，则抽 2 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "control",
+                                   "draw"
+                               ]
+                  },
+                  {
+                      "id":  "packet_sniffer.ps1",
+                      "name":  "packet_sniffer.ps1",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "抓包成功：获得 1 点指针，恢复 1 点 MP，并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "utility",
+                                   "draw"
+                               ]
+                  },
+                  {
+                      "id":  "race_patch.cr",
+                      "name":  "race_patch.cr",
+                      "cost":  2,
+                      "complexity":  "O(1)",
+                      "text":  "抢在敌人提交前打补丁：造成 2 点伤害，护甲 -1，并延后 1 回合。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "control",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "scheduler_tick.nim",
+                      "name":  "scheduler_tick.nim",
+                      "cost":  1,
+                      "complexity":  "O(1)",
+                      "text":  "优化调度：待结算负载 -1，并抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "maintenance",
+                                   "draw"
+                               ],
+                      "mutexGroups":  [
+                                          "hard_cleanse"
+                                      ]
+                  },
+                  {
+                      "id":  "deadlock_breaker.ml",
+                      "name":  "deadlock_breaker.ml",
+                      "cost":  4,
+                      "complexity":  "O(n^2)",
+                      "text":  "强行拆锁：大幅削减敌方攻击，脚本值 -2，并延后 2 回合。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "control"
+                               ],
+                      "mutexGroups":  [
+                                          "hard_stall"
+                                      ]
+                  },
+                  {
+                      "id":  "sandbox_escape.bat",
+                      "name":  "sandbox_escape.bat",
+                      "cost":  4,
+                      "complexity":  "O(1)",
+                      "text":  "越狱执行：直接造成 7 点穿透伤害，但会写入 1 张 overflow_error.log。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "finisher"
+                               ],
+                      "mutexGroups":  [
+                                          "burst_zero"
+                                      ]
+                  },
+                  {
+                      "id":  "vectorize.simd",
+                      "name":  "vectorize.simd",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "并行向量化打击：按敌方可移动区中的奇数 bit 数量造成伤害，至少 3 点，至多 7 点。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "parity_flip.el",
+                      "name":  "parity_flip.el",
+                      "cost":  1,
+                      "complexity":  "O(n)",
+                      "text":  "翻转敌方可移动区的奇偶校验，并使敌方护甲 -1，抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "manipulation",
+                                   "disrupt"
+                               ]
+                  },
+                  {
+                      "id":  "entropy_seed.jl",
+                      "name":  "entropy_seed.jl",
+                      "cost":  1,
+                      "complexity":  "O(1)",
+                      "text":  "播下稳定种子：熵值 -4，攻击 -1。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "control",
+                                   "disrupt"
+                               ]
+                  },
+                  {
+                      "id":  "gc_mark.scm",
+                      "name":  "gc_mark.scm",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "标记并清扫：清掉 1 张垃圾卡，恢复 3 点生命，并减少 1 点待结算负载。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "maintenance",
+                                   "cleanup",
+                                   "heal"
+                               ],
+                      "mutexGroups":  [
+                                          "hard_cleanse"
+                                      ]
+                  },
+                  {
+                      "id":  "shard_balance.tf",
+                      "name":  "shard_balance.tf",
+                      "cost":  3,
+                      "complexity":  "O(n log n)",
+                      "text":  "均衡敌方攻击、护甲与脚本位，压平极端数值，并让敌人下次行动延后 1 回合。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "control",
+                                   "disrupt"
+                               ]
+                  },
+                  {
+                      "id":  "tail_call.lisp",
+                      "name":  "tail_call.lisp",
+                      "cost":  1,
+                      "complexity":  "O(1)",
+                      "text":  "将上一张已执行的脚本压回牌堆顶，然后抽 1 张牌。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "utility"
+                               ],
+                      "mutexGroups":  [
+                                          "value_loop"
+                                      ]
+                  },
+                  {
+                      "id":  "diff_fuzzer.groovy",
+                      "name":  "diff_fuzzer.groovy",
+                      "cost":  3,
+                      "complexity":  "O(n^2)",
+                      "text":  "模糊轰炸敌方可移动区，随机打乱其内容并造成 4 点伤害。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "disrupt",
+                                   "finisher"
+                               ],
+                      "mutexGroups":  [
+                                          "ultra_sort"
+                                      ]
+                  },
+                  {
+                      "id":  "ping_break.c",
+                      "name":  "ping_break.c",
+                      "cost":  1,
+                      "complexity":  "O(1)",
+                      "text":  "发起一次短促探测，直接造成 3 点伤害。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "attack",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "packet_burst.lua",
+                      "name":  "packet_burst.lua",
+                      "cost":  2,
+                      "complexity":  "O(n)",
+                      "text":  "连续封包轰击目标，直接造成 5 点伤害。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "attack",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "breach_charge.rs",
+                      "name":  "breach_charge.rs",
+                      "cost":  2,
+                      "complexity":  "O(1)",
+                      "text":  "破口装药命中目标，造成 4 点伤害并削减 1 点护甲。",
+                      "starter":  false,
+                      "source":  "reward",
+                      "tags":  [
+                                   "attack",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "railgun.asm",
+                      "name":  "railgun.asm",
+                      "cost":  3,
+                      "complexity":  "O(1)",
+                      "text":  "磁轨直击：直接造成 6 点穿透伤害。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "attack",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "recursion_spike.go",
+                      "name":  "recursion_spike.go",
+                      "cost":  4,
+                      "complexity":  "O(n log n)",
+                      "text":  "递归尖刺贯穿目标，直接造成 8 点穿透伤害。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "attack",
+                                   "finisher"
+                               ]
+                  },
+                  {
+                      "id":  "kernel_panic.sys",
+                      "name":  "kernel_panic.sys",
+                      "cost":  5,
+                      "complexity":  "O(n^2)",
+                      "text":  "制造一次内核级崩溃，直接造成 10 点穿透伤害，但会写入 1 张 overflow_error.log。",
+                      "starter":  false,
+                      "source":  "rare",
+                      "tags":  [
+                                   "attack",
+                                   "finisher"
+                               ],
+                      "mutexGroups":  [
+                                          "burst_zero"
+                                      ]
+                  }
+              ]
+}
