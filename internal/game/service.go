@@ -64,6 +64,7 @@ type PlayerView struct {
 	Pointers     int         `json:"pointers"`
 	Artifacts    []Artifact  `json:"artifacts"`
 	Lore         []string    `json:"lore"`
+	LoreEntries  []LoreEntry `json:"loreEntries"`
 	Deck         []DeckCount `json:"deck"`
 	DrawBonus    int         `json:"drawBonus"`
 	GCHeal       int         `json:"gcHeal"`
@@ -209,6 +210,7 @@ func (s *Session) snapshotLocked() StateResponse {
 			Pointers:     s.Game.player.PointerCharges,
 			Artifacts:    append([]Artifact{}, s.Game.player.Artifacts...),
 			Lore:         append([]string{}, s.Game.player.Lore...),
+			LoreEntries:  append([]LoreEntry{}, s.Game.player.LoreEntries...),
 			Deck:         deckSummary(s.Game.player.Deck),
 			DrawBonus:    s.Game.player.DrawBonus,
 			GCHeal:       s.Game.player.GCHeal,
@@ -343,6 +345,12 @@ func (s *Session) enterNodeLocked(node *Node) error {
 		s.Game.player.PendingLoad = 0
 		node.Cleared = true
 		s.pushMessage(fmt.Sprintf("%s 完成了一次局部整理，生命 +%d，内存回满。", node.Name, heal))
+		if whisperID := restWhisperIDForNode(node.Index); whisperID != "" {
+			s.Game.player.AddLoreEntryByID(whisperID)
+			if entry, ok := storyEntry(whisperID); ok {
+				s.pushMessage(fmt.Sprintf("已恢复：%s", entry.Title))
+			}
+		}
 		s.applyPendingSyncLocked()
 	case NodeTreasure:
 		node.Cleared = true
@@ -565,7 +573,10 @@ func (s *Session) completeCombatLocked() {
 	s.Game.player.Load = 0
 	s.Game.player.PendingLoad = 0
 	if enemy.Lore != "" {
-		s.Game.player.AddLore(enemy.Lore)
+		s.Game.player.AddLoreEntryByID(enemy.Lore)
+		if entry, ok := storyEntry(enemy.Lore); ok {
+			s.PendingRewardLore = entry.Title
+		}
 	}
 	if enemy.Elite && !enemy.Boss {
 		s.Game.player.PurgeCredits++
@@ -576,7 +587,6 @@ func (s *Session) completeCombatLocked() {
 	if enemy.Elite && !enemy.Boss {
 		s.PendingRewardMsg += " 精英战额外奖励了 1 点重构额度。"
 	}
-	s.PendingRewardLore = enemy.Lore
 	s.PendingCards = s.Game.randomRewardCardsForEnemy(enemy, 3)
 	s.PendingBossWin = enemy.Boss
 	s.Battle.Close()
@@ -598,9 +608,12 @@ func (s *Session) applyGlitchLocked(node *Node) {
 		s.Game.player.MP = s.Game.player.EffectiveMaxMP()
 		s.pushMessage(fmt.Sprintf("%s 触发缓存回暖，你的 MP 已恢复到上限。", node.Name))
 	default:
-		fragment := "故障碎片：有人在注释里写道，真正的出口不在根目录，而在递归停止的地方。"
-		s.Game.player.AddLore(fragment)
-		s.pushMessage(fragment)
+		ids := glitchFragmentIDs()
+		id := ids[s.Game.rng.Intn(len(ids))]
+		s.Game.player.AddLoreEntryByID(id)
+		if entry, ok := storyEntry(id); ok {
+			s.pushMessage(formatLoreEntry(entry))
+		}
 	}
 }
 
@@ -819,9 +832,11 @@ func rewardChoices(choices []rewardOption) []ChoiceView {
 
 func endMessage(game *Game) string {
 	if game.won {
-		return "Root 已被重写。你成功夺取了 The Kernel 的控制权。"
+		summary := reconstructedSessionSummary(game.player.LoreEntries)
+		ending := endingProtocolEntry().Text
+		return summary + "\n\n" + ending
 	}
-	return "会话已断开。The Kernel 在你面前重新闭合。"
+	return "会话已中断。The Kernel 在你面前重新闭合，那句被封锁的广播仍未完整恢复。"
 }
 
 func (g *Game) randomRewardCardsForEnemy(enemy *Enemy, n int) []CardID {

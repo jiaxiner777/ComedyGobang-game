@@ -1,4 +1,4 @@
-﻿package game
+package game
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ func enemyTemplate(node *Node, rng *rand.Rand) *Enemy {
 			Tier:               1,
 			UnsortedAttackGain: 1,
 			Reward:             "你截获了追踪守卫的一段内存片段。",
-			Lore:               "日志碎片 01：第一批守卫只会记录闯入者，还不会思考为什么有人要回来。",
+			Lore:               combatLoreIDForNode(2),
 		}
 	case 4:
 		return &Enemy{
@@ -26,7 +26,7 @@ func enemyTemplate(node *Node, rng *rand.Rand) *Enemy {
 			InjectionCount: 2,
 			InjectionOnly:  true,
 			Reward:         "递归复制体崩解后，掉出了一段可复用的异常脚本。",
-			Lore:           "日志碎片 02：有人试图用复制来逃离内核，结果只留下越来越吵的回声。",
+			Lore:           combatLoreIDForNode(4),
 		}
 	case 6:
 		return &Enemy{
@@ -35,7 +35,7 @@ func enemyTemplate(node *Node, rng *rand.Rand) *Enemy {
 			Tier:        2,
 			LockedSlots: 2,
 			Reward:      "平衡旋转模块掉出了一段稳定器代码。",
-			Lore:        "日志碎片 03：老程序员害怕失衡，所以把最重要的两位永远焊死。",
+			Lore:        combatLoreIDForNode(6),
 		}
 	case 9:
 		return &Enemy{
@@ -44,7 +44,7 @@ func enemyTemplate(node *Node, rng *rand.Rand) *Enemy {
 			Tier:               2,
 			UnsortedAttackGain: 1,
 			Reward:             "补丁猎犬吐出了被标记过的差异块。",
-			Lore:               "日志碎片 04：每一次改动都会留下味道，系统学会了沿着味道追猎。",
+			Lore:               combatLoreIDForNode(9),
 		}
 	case 11:
 		return &Enemy{
@@ -54,7 +54,7 @@ func enemyTemplate(node *Node, rng *rand.Rand) *Enemy {
 			Elite:            true,
 			SortPunishAttack: 3,
 			Reward:           "红黑祭司的防篡改脚本已经被你拆解。",
-			Lore:             "日志碎片 05：秩序不是为了高效，而是为了惩罚那些热衷重新排序的人。",
+			Lore:             combatLoreIDForNode(11),
 		}
 	case 13:
 		return &Enemy{
@@ -65,7 +65,7 @@ func enemyTemplate(node *Node, rng *rand.Rand) *Enemy {
 			InjectionCount:     1,
 			UnsortedAttackGain: 2,
 			Reward:             "坏扇区深处吐出了一段仍在闪烁的恢复代码。",
-			Lore:               "日志碎片 06：真正危险的不是坏掉的数据，而是那些坏了还拒绝离场的数据。",
+			Lore:               combatLoreIDForNode(13),
 		}
 	case 15:
 		return &Enemy{
@@ -78,7 +78,7 @@ func enemyTemplate(node *Node, rng *rand.Rand) *Enemy {
 			SortPunishAttack: 2,
 			InjectionCount:   2,
 			Reward:           "Root 根目录的写入权限暂时向你敞开。",
-			Lore:             "日志碎片 07：写下这一切的人早已离开，但他把最后的门交给了最 stubborn 的守卫。",
+			Lore:             combatLoreIDForNode(15),
 		}
 	default:
 		base := 20 + rng.Intn(10)

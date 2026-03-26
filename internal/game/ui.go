@@ -1,4 +1,4 @@
-package game
+﻿package game
 
 import (
 	"fmt"
@@ -488,21 +488,21 @@ func (b *Battle) animate(title string, frames [][]int) {
 
 func (b *Battle) intentString() string {
 	if b.enemy.InjectionOnly && b.enemyCountdown() <= 0 {
-		return fmt.Sprintf("即将发动反向注入，写入 %d 个污染效果", max(1, b.enemy.InjectionCount))
+		return fmt.Sprintf("即将发动反向注入，写入 %d 个污染 bit。", max(1, b.enemy.InjectionCount))
 	}
 	if b.enemyCountdown() <= 0 {
-		return fmt.Sprintf("棰勮绔嬪埢鏀诲嚮锛屼激瀹崇害 %d", b.enemyAttack()+b.enemyScript()/4)
+		return fmt.Sprintf("敌方即将执行主攻击，预计造成 %d 点伤害。", b.enemyAttack()+b.enemyScript()/4)
 	}
 	if b.enemy.InjectionCount > 0 {
-		return fmt.Sprintf("攻击时会额外注入 %d 个污染效果", b.enemy.InjectionCount)
+		return fmt.Sprintf("敌人攻击时会额外注入 %d 个污染 bit。", b.enemy.InjectionCount)
 	}
 	if b.enemyEntropy() >= 10 {
-		return "高熵状态：小心爆发伤害或自我修复"
+		return "高熵状态：小心爆发伤害或自我修复。"
 	}
 	if b.enemyArmor() >= 8 {
-		return "闃插尽寰幆涓細澶ф鐜囩户缁彔鎶ょ敳"
+		return "敌方护甲很高，优先考虑穿透、削甲或重排脚本位。"
 	}
-	return fmt.Sprintf("正在蓄力攻击，还需 %d 个计时", b.enemyCountdown())
+	return fmt.Sprintf("敌方正在蓄力攻击，还需 %d 回合。", b.enemyCountdown())
 }
 
 func (b *Battle) stackString() string {
@@ -543,10 +543,10 @@ func (g *Game) rewardBundle(node *Node) []rewardOption {
 		},
 		{
 			label: "Threaded Stack",
-			desc:  "Stack Overflow 的额外伤害 +2。",
+			desc:  "栈溢出回放的额外伤害 +2。",
 			apply: func(g *Game) {
 				g.player.StackEchoDamage += 2
-				g.player.AddArtifact(Artifact{Name: "Threaded Stack", Desc: "Stack Overflow 的额外伤害 +2。"})
+				g.player.AddArtifact(Artifact{Name: "Threaded Stack", Desc: "栈溢出回放的额外伤害 +2。"})
 			},
 		},
 		{
@@ -560,10 +560,10 @@ func (g *Game) rewardBundle(node *Node) []rewardOption {
 		},
 		{
 			label: "Warm Cache Latch",
-			desc:  "每回合开始额外抽 1 张牌。",
+			desc:  "每回合开始时额外抽 1 张牌。",
 			apply: func(g *Game) {
 				g.player.DrawBonus++
-				g.player.AddArtifact(Artifact{Name: "Warm Cache Latch", Desc: "每回合开始额外抽 1 张牌。"})
+				g.player.AddArtifact(Artifact{Name: "Warm Cache Latch", Desc: "每回合开始时额外抽 1 张牌。"})
 			},
 		},
 		{
@@ -580,13 +580,24 @@ func (g *Game) rewardBundle(node *Node) []rewardOption {
 	if len(cardChoices) > 1 && g.rng.Intn(100) < 20 {
 		cardChoices[1] = CardDefrag
 	}
+
+	entry, hasEntry := storyEntry(treasureLoreIDForNode(node.Index))
 	lore := rewardOption{
-		label: "Floppy Lore Fragment",
-		desc:  fmt.Sprintf("收集一段来自 %s 的旧世界碎片。", node.Name),
+		label: "档案碎片",
+		desc:  fmt.Sprintf("恢复 %s 中遗失的一段存档。", node.Name),
 		apply: func(g *Game) {
-			g.player.AddLore(fmt.Sprintf("档案碎片 %s：这台机器记得每一个停留太久的操作员。", node.Name))
+			if hasEntry {
+				g.player.AddLoreEntry(entry)
+				return
+			}
+			g.player.AddLore(fmt.Sprintf("档案碎片 %s：这台机器仍记得每一个停留过久的操作员。", node.Name))
 		},
 	}
+	if hasEntry {
+		lore.label = entry.Title
+		lore.desc = entry.Text
+	}
+
 	return []rewardOption{
 		artifacts[g.rng.Intn(len(artifacts))],
 		{
@@ -599,7 +610,6 @@ func (g *Game) rewardBundle(node *Node) []rewardOption {
 		lore,
 	}
 }
-
 func (g *Game) randomRewardCards(n int) []CardID {
 	return g.drawRewardCardsFromActivePool(n)
 }
@@ -649,3 +659,5 @@ func slotValue(frame []int, index int) int {
 	}
 	return max(0, frame[index])
 }
+
+

@@ -64,6 +64,7 @@ type Player struct {
 	Deck            []CardID
 	Artifacts       []Artifact
 	Lore            []string
+	LoreEntries     []LoreEntry
 	PointerCharges  int
 	StartMPBonus    int
 	DrawBonus       int
@@ -303,4 +304,23 @@ func (p *Player) AddLore(fragment string) {
 		return
 	}
 	p.Lore = append(p.Lore, fragment)
+}
+
+func (p *Player) AddLoreEntry(entry LoreEntry) {
+	if entry.ID == "" && entry.Text == "" {
+		return
+	}
+	for _, existing := range p.LoreEntries {
+		if entry.ID != "" && existing.ID == entry.ID {
+			return
+		}
+	}
+	p.LoreEntries = append(p.LoreEntries, entry)
+	p.Lore = append(p.Lore, formatLoreEntry(entry))
+}
+
+func (p *Player) AddLoreEntryByID(id string) {
+	if entry, ok := storyEntry(id); ok {
+		p.AddLoreEntry(entry)
+	}
 }
