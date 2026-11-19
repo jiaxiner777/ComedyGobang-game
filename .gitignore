@@ -1,43 +1,20 @@
-# OS / editor noise
-.DS_Store
-Thumbs.db
-Desktop.ini
+# Local caches and build outputs
+.gocache/
+.gotmp/
+.gomodcache/
+dist/
+node_modules/
+*.exe
+*.test
+*.log
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# Go caches
-.gocache/
-.gocache_dyn/
-.gomodcache/
-coverage.out
-*.test
-
-# Build outputs
-dist/*
-!dist/codebreaker_web_refactor.exe
-bin/
-build/
-release/
-
-# Local env / logs / temp
+.DS_Store
+Thumbs.db
+# Local credentials
 .env
-.env.local
-*.log
-tmp/
-temp/
-*.tmp
-tmp_*.txt
-tmp_*.png
-tmp_*.json
-tmp_server_out.txt
-tmp_server_err.txt
-
-# Runtime / packaged binaries
-*.exe
-*.dll
-*.so
-*.dylib
-!dist/codebreaker_web_refactor.exe
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
