@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>喜剧五子棋 - Comedy Gobang</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 复古小品舞台风格 */
+        body {
+            background: linear-gradient(135deg, #8B0000 0%, #4B0000 100%);
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        .stage-curtain {
+            background: linear-gradient(180deg, #8B0000 0%, #CD5C5C 50%, #8B0000 100%);
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+        
+        .gold-glow {
+            animation: goldGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes goldGlow {
+            0%, 100% { box-shadow: 0 0 20px gold, 0 0 40px gold; }
+            50% { box-shadow: 0 0 30px gold, 0 0 60px gold, 0 0 80px orange; }
+        }
+        
+        .danmaku {
+            position: absolute;
+            white-space: nowrap;
+            font-weight: bold;
+            animation: danmakuMove 8s linear;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        @keyframes danmakuMove {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
+        
+        .screen-shake {
+            animation: screenShake 0.5s;
+        }
+        
+        @keyframes screenShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px) rotate(-1deg); }
+            75% { transform: translateX(10px) rotate(1deg); }
+        }
+        
+        .skill-button {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            transition: all 0.3s;
+        }
+        
+        .skill-button:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255,215,0,0.6);
+        }
+        
+        .skill-button:disabled {
+            background: linear-gradient(45deg, #666, #444);
+            cursor: not-allowed;
+        }
+        
+        .board-cell {
+            transition: all 0.2s;
+        }
+        
+        .board-cell:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .piece-black {
+            background: radial-gradient(circle at 30% 30%, #444, #000);
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .piece-white {
+            background: radial-gradient(circle at 30% 30%, #fff, #ccc);
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white">
+    <div id="app">
+        <!-- 主界面 -->
+        <div v-if="!currentRoom" class="min-h-screen flex items-center justify-center p-8">
+            <div class="stage-curtain rounded-lg p-8 max-w-2xl w-full">
+                <h1 class="text-4xl font-bold text-center mb-8 text-yellow-300">🎭 喜剧五子棋</h1>
+                
+                <!-- 房间列表 -->
+                <div class="mb-8">
+                    <h2 class="text-2xl font-semibold mb-4 text-yellow-200">房间列表</h2>
+                    <div class="grid gap-4">
+                        <div v-for="room in rooms" :key="room.id" 
+                             class="bg-red-900 bg-opacity-50 p-4 rounded-lg border border-yellow-600">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="font-semibold text-yellow-300">房间 {{ room.id }}</h3>
+                                    <p class="text-sm text-gray-300">
+                                        {{ room.clients }}/2 玩家 
+                                        <span v-if="room.full" class="text-red-400">(已满)</span>
+                                    </p>
+                                </div>
+                                <button @click="joinRoom(room.id)" 
+                                        :disabled="room.full"
+                                        class="px-4 py-2 bg-yellow-600 text-black rounded hover:bg-yellow-500 disabled:bg-gray-600 disabled:text-gray-400 transition">
+                                    加入房间
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 创建房间 -->
+                <div class="text-center">
+                    <button @click="createRoom" 
+                            class="px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold rounded-lg hover:from-yellow-400 hover:to-yellow-500 transition transform hover:scale-105">
+                        🎲 创建新房间
+                    </button>
+                </div>
+                
+                <!-- 玩家名称输入 -->
+                <div class="mt-8">
+                    <label class="block text-yellow-200 mb-2">你的名字：</label>
+                    <input v-model="playerName" 
+                           type="text" 
+                           placeholder="输入你的名字"
+                           class="w-full px-4 py-2 bg-red-800 bg-opacity-50 border border-yellow-600 rounded text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 游戏界面 -->
+        <div v-else class="min-h-screen p-4">
+            <!-- 顶部信息栏 -->
+            <div class="stage-curtain rounded-lg p-4 mb-4">
+                <div class="flex justify-between items-center">
+                    <div class="text-yellow-300">
+                        <h2 class="text-2xl font-bold">房间 {{ currentRoom.id }}</h2>
+                        <p v-if="gameState">{{ gameState.players[gameState.currentPlayer]?.name || '等待玩家...' }} 的回合</p>
+                    </div>
+                    <div class="flex gap-4">
+                        <div v-if="gameState && gameState.players[currentPlayerIndex]" class="text-yellow-200">
+                            <span class="font-semibold">能量：</span>
+                            <span class="text-yellow-300">{{ gameState.players[currentPlayerIndex].mana }}/100</span>
+                        </div>
+                        <button @click="leaveRoom" 
+                                class="px-4 py-2 bg-red-600 rounded hover:bg-red-500 transition">
+                            离开房间
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 弹幕区域 -->
+            <div class="relative h-20 mb-4 overflow-hidden rounded-lg bg-black bg-opacity-30">
+                <div v-for="quote in danmakuList" :key="quote.id" 
+                     :style="{ top: quote.top + 'px', color: quote.color }"
+                     class="danmaku">
+                    {{ quote.text }}
+                </div>
+            </div>
+            
+            <!-- 游戏主区域 -->
+            <div class="flex gap-4">
+                <!-- 棋盘 -->
+                <div class="flex-1 stage-curtain rounded-lg p-4">
+                    <canvas ref="boardCanvas" 
+                            @click="handleBoardClick"
+                            width="600" 
+                            height="600"
+                            class="mx-auto cursor-pointer">
+                    </canvas>
+                </div>
+                
+                <!-- 侧边栏 -->
+                <div class="w-80">
+                    <!-- 玩家信息 -->
+                    <div class="stage-curtain rounded-lg p-4 mb-4">
+                        <h3 class="text-xl font-semibold mb-4 text-yellow-300">玩家信息</h3>
+                        <div v-for="(player, index) in gameState?.players || []" :key="index"
+                             class="mb-3 p-3 bg-red-800 bg-opacity-30 rounded">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-yellow-200">{{ player.name || '等待玩家...' }}</p>
+                                    <p class="text-sm flex items-center gap-2">
+                                        <span :class="player.color === 1 ? 'w-3 h-3 bg-black rounded-full' : 'w-3 h-3 bg-white border border-gray-400 rounded-full'"></span>
+                                        <span :class="player.color === 1 ? 'text-gray-800' : 'text-gray-100'">
+                                            {{ player.color === 1 ? '黑棋' : '白棋' }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div v-if="player.ready" class="text-green-400">✓ 已准备</div>
+                            </div>
+                        </div>
+                        
+                        <!-- 准备按钮 -->
+                        <div v-if="gameState && gameState.state === 0" class="mt-4">
+                            <button @click="toggleReady" 
+                                    :class="isReady ? 'bg-red-600 hover:bg-red-500' : 'bg-green-600 hover:bg-green-500'"
+                                    class="w-full py-2 rounded font-semibold transition">
+                                {{ isReady ? '取消准备' : '准备游戏' }}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 技能面板 -->
+                    <div v-if="gameState && gameState.state === 1 && isMyTurn" class="stage-curtain rounded-lg p-4">
+                        <h3 class="text-xl font-semibold mb-4 text-yellow-300">技能面板</h3>
+                        <div class="space-y-3">
+                            <div v-for="skill in mySkills" :key="skill.type"
+                                 class="p-3 bg-red-800 bg-opacity-30 rounded">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h4 class="font-semibold text-yellow-200">{{ skill.name }}</h4>
+                                        <p class="text-xs text-gray-300">{{ skill.description }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-xs text-yellow-300">{{ skill.mana_cost }} 能量</p>
+                                        <p v-if="skill.current_cd > 0" class="text-xs text-red-400">
+                                            冷却: {{ skill.current_cd }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button @click="useSkill(skill.type)" 
+                                        :disabled="!canUseSkill(skill)"
+                                        class="w-full py-1 skill-button rounded text-black text-sm font-semibold">
+                                    {{ skill.current_cd > 0 ? `冷却中 (${skill.current_cd})` : '使用技能' }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 游戏结果弹窗 -->
+        <div v-if="gameState && gameState.state === 2" 
+             class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div class="stage-curtain rounded-lg p-8 max-w-md">
+                <h2 class="text-3xl font-bold text-center mb-4 text-yellow-300">
+                    {{ gameState.winner === currentPlayerIndex ? '🎉 你赢了!' : '😢 你输了!' }}
+                </h2>
+                <p class="text-center mb-6">
+                    {{ gameState.players[gameState.winner]?.name }} 获得胜利！
+                </p>
+                <div class="text-center">
+                    <button @click="leaveRoom" 
+                            class="px-6 py-3 bg-yellow-600 text-black font-bold rounded hover:bg-yellow-500 transition">
+                        返回大厅
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    playerName: '玩家' + Math.floor(Math.random() * 1000),
+                    rooms: [],
+                    currentRoom: null,
+                    gameState: null,
+                    ws: null,
+                    clientId: null,
+                    pendingSkill: null,
+                    danmakuList: [],
+                    danmakuId: 0,
+                    isReady: false,
+                    boardSize: 15,
+                    cellSize: 40,
+                    boardOffset: 30
+                };
+            },
+            computed: {
+                currentPlayerIndex() {
+                    if (!this.gameState || !this.clientId) return -1;
+                    const playerId = this.getPlayerId();
+                    console.log('查找玩家ID:', playerId, '游戏玩家:', this.gameState.players);
+                    const index = this.gameState.players.findIndex(p => p.id === playerId);
+                    console.log('找到玩家索引:', index);
+                    return index;
+                },
+                isMyTurn() {
+                    const result = this.currentPlayerIndex === this.gameState?.currentPlayer;
+                    console.log('是否轮到我:', {
+                        currentPlayerIndex: this.currentPlayerIndex,
+                        gameStateCurrentPlayer: this.gameState?.currentPlayer,
+                        result: result
+                    });
+                    return result;
+                },
+                mySkills() {
+                    if (!this.gameState || this.currentPlayerIndex === -1) return [];
+                    const skills = this.gameState.players[this.currentPlayerIndex].skills || [];
+                    console.log('我的技能:', skills);
+                    return skills;
+                }
+            },
+            methods: {
+                // WebSocket连接
+                connectWebSocket() {
+                    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                    const wsUrl = `${protocol}//${window.location.host}/ws`;
+                    
+                    console.log('尝试连接WebSocket:', wsUrl);
+                    this.ws = new WebSocket(wsUrl);
+                    
+                    this.ws.onopen = () => {
+                        console.log('WebSocket连接成功');
+                        this.loadRooms();
+                    };
+                    
+                    this.ws.onerror = (error) => {
+                        console.error('WebSocket连接错误:', error);
+                    };
+                    
+                    this.ws.onclose = (event) => {
+                        console.log('WebSocket连接关闭:', event.code, event.reason);
+                        setTimeout(() => {
+                            console.log('尝试重新连接WebSocket...');
+                            this.connectWebSocket();
+                        }, 3000);
+                    };
+                    
+                    this.ws.onmessage = (event) => {
+                        const message = JSON.parse(event.data);
+                        console.log('收到WebSocket消息:', message);
+                        this.handleMessage(message);
+                    };
+                },
+                
+                // 消息处理
+                handleMessage(message) {
+                    switch (message.type) {
+                        case 'client_id':
+                            this.clientId = message.data.client_id;
+                            this.updateReadyState();
+                            console.log('设置客户端ID:', this.clientId);
+                            break;
+                        case 'room_state':
+                            this.currentRoom = message.data;
+                            this.gameState = message.data.game;
+                            this.pendingSkill = null;
+                            this.updateReadyState();
+                            break;
+                        case 'game_state':
+                            this.gameState = message.data;
+                            this.pendingSkill = null;
+                            this.updateReadyState();
+                            this.$nextTick(() => this.drawBoard());
+                            break;
+                        case 'game_start':
+                            console.log('收到游戏开始消息:', message.data);
+                            this.gameState = message.data.game;
+                            this.updateReadyState();
+                            this.$nextTick(() => this.drawBoard());
+                            // 添加游戏开始的提示
+                            this.addDanmaku('🎭 游戏开始！准备开始一场尴尬的对决！');
+                            break;
+                        case 'quote':
+                            this.addDanmaku(message.data.text);
+                            break;
+                        case 'game_over':
+                            this.gameState = message.data.game;
+                            this.pendingSkill = null;
+                            break;
+                        case 'error':
+                            this.pendingSkill = null;
+                            console.error('服务器错误:', message.data.message);
+                            alert(message.data.message);
+                            break;
+                    }
+                },
+                
+                // 发送消息
+                sendMessage(type, data) {
+                    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                        this.ws.send(JSON.stringify({
+                            type,
+                            data,
+                            timestamp: Date.now()
+                        }));
+                    }
+                },
+                
+                // 加载房间列表
+                async loadRooms() {
+                    try {
+                        const response = await fetch('/api/rooms');
+                        const result = await response.json();
+                        this.rooms = result.rooms;
+                    } catch (error) {
+                        console.error('加载房间列表失败:', error);
+                    }
+                },
+                
+                // 创建房间
+                async createRoom() {
+                    try {
+                        const response = await fetch('/api/rooms', { method: 'POST' });
+                        const result = await response.json();
+                        this.joinRoom(result.room.id);
+                    } catch (error) {
+                        console.error('创建房间失败:', error);
+                    }
+                },
+                
+                // 加入房间
+                joinRoom(roomId) {
+                    this.sendMessage('join_room', {
+                        room_id: roomId,
+                        player_name: this.playerName
+                    });
+                },
+                
+                // 离开房间
+                leaveRoom() {
+                    if (this.currentRoom) {
+                        this.sendMessage('leave_room', {});
+                    }
+                    // 重置状态
+                    this.currentRoom = null;
+                    this.gameState = null;
+                    this.isReady = false;
+                    this.pendingSkill = null;
+                    this.clientId = null; // 重置客户端ID
+                    // 强制刷新房间列表
+                    this.loadRooms();
+                },
+                
+                // 切换准备状态
+                toggleReady() {
+                    // 发送准备请求，等待服务器确认
+                    this.sendMessage('set_ready', { ready: !this.isReady });
+                    // 不立即更新本地状态，等待服务器响应
+                },
+                
+                // 棋盘点击
+                handleBoardClick(event) {
+                    console.log('棋盘点击 - 游戏状态:', this.gameState?.state, '是否轮到我:', this.isMyTurn, '当前玩家索引:', this.currentPlayerIndex);
+                    
+                    if (!this.gameState || this.gameState.state !== 1 || !this.isMyTurn) {
+                        console.log('点击被阻止 - 原因:', {
+                            hasGameState: !!this.gameState,
+                            correctState: this.gameState?.state === 1,
+                            isMyTurn: this.isMyTurn
+                        });
+                        return;
+                    }
+                    
+                    console.log('点击被允许，处理落子...');
+                    
+                    const rect = this.$refs.boardCanvas.getBoundingClientRect();
+                    const scaleX = this.$refs.boardCanvas.width / rect.width;
+                    const scaleY = this.$refs.boardCanvas.height / rect.height;
+                    const x = (event.clientX - rect.left) * scaleX;
+                    const y = (event.clientY - rect.top) * scaleY;
+                    
+                    const col = Math.round((x - this.boardOffset) / this.cellSize);
+                    const row = Math.round((y - this.boardOffset) / this.cellSize);
+                    const centerX = this.boardOffset + col * this.cellSize;
+                    const centerY = this.boardOffset + row * this.cellSize;
+                    const snapDistance = Math.hypot(x - centerX, y - centerY);
+                    
+                    console.log('计算出的位置:', { col, row });
+                    
+                    if (col >= 0 && col < this.boardSize && row >= 0 && row < this.boardSize && snapDistance <= this.cellSize * 0.45) {
+                        if (this.pendingSkill !== null) {
+                            this.handlePendingSkillClick(col, row);
+                        } else {
+                            this.sendMessage('make_move', { x: col, y: row });
+                        }
+                    }
+                },
+                
+                getBoardPiece(col, row) {
+                    return this.gameState?.board?.[col]?.[row] ?? 0;
+                },
+
+                sendSkillRequest(skillType, targetPositions = []) {
+                    const data = { skill_type: skillType };
+                    if (targetPositions.length > 0) {
+                        data.target_positions = targetPositions;
+                        data.target_pos = targetPositions[0];
+                    }
+                    this.sendMessage('use_skill', data);
+                },
+
+                handlePendingSkillClick(col, row) {
+                    const skillType = this.pendingSkill.type;
+
+                    if (skillType === 0) {
+                        this.sendSkillRequest(skillType, [{ x: col, y: row }]);
+                        this.pendingSkill = null;
+                        return;
+                    }
+
+                    if (skillType === 2) {
+                        const piece = this.getBoardPiece(col, row);
+
+                        if (this.pendingSkill.targets.length === 0) {
+                            if (piece !== 1) {
+                                alert('请先选择一颗黑棋');
+                                return;
+                            }
+                            this.pendingSkill.targets = [{ x: col, y: row }];
+                            alert('已选择黑棋，请再选择一颗白棋');
+                            return;
+                        }
+
+                        if (piece !== 2) {
+                            alert('第二步请选择一颗白棋');
+                            return;
+                        }
+
+                        const firstTarget = this.pendingSkill.targets[0];
+                        this.sendSkillRequest(skillType, [firstTarget, { x: col, y: row }]);
+                        this.pendingSkill = null;
+                    }
+                },
+
+                // 使用技能
+                useSkill(skillType) {
+                    const skill = this.mySkills.find(s => s.type === skillType);
+                    if (!this.canUseSkill(skill)) return;
+                    if (skillType === 2) {
+                        this.sendSkillRequest(skillType);
+                        return;
+                    }
+                    
+                    // 对于需要目标的技能，让玩家点击棋盘
+                    if (skillType === 0) { // 贾总的咆哮需要目标
+                        this.pendingSkill = { type: skillType, targets: [] };
+                        alert('请点击要移除的对方棋子');
+                    } else if (skillType === 2) {
+                        this.pendingSkill = { type: skillType, targets: [] };
+                        alert('请先选择一颗黑棋，再选择一颗白棋');
+                    } else {
+                        this.sendSkillRequest(skillType);
+                    }
+                },
+                
+                // 检查是否可以使用技能
+                canUseSkill(skill) {
+                    if (!skill || skill.current_cd > 0) return false;
+                    const player = this.gameState?.players[this.currentPlayerIndex];
+                    return player && player.mana >= skill.mana_cost;
+                },
+                
+                // 更新准备状态
+                updateReadyState() {
+                    if (!this.gameState || !this.gameState.players) return;
+                    
+                    const currentPlayer = this.gameState.players[this.currentPlayerIndex];
+                    if (currentPlayer) {
+                        this.isReady = currentPlayer.ready || false;
+                    }
+                },
+                
+                // 获取玩家ID
+                getPlayerId() {
+                    // 从当前客户端信息中获取ID
+                    // 这个ID在WebSocket连接建立时设置
+                    return this.clientId || 'unknown-client';
+                },
+                
+                // 添加弹幕
+                addDanmaku(text) {
+                    const colors = ['#FFD700', '#FF69B4', '#00CED1', '#FF6347', '#32CD32'];
+                    const danmaku = {
+                        id: this.danmakuId++,
+                        text,
+                        top: Math.random() * 60,
+                        color: colors[Math.floor(Math.random() * colors.length)]
+                    };
+                    
+                    this.danmakuList.push(danmaku);
+                    
+                    // 8秒后移除弹幕
+                    setTimeout(() => {
+                        this.danmakuList = this.danmakuList.filter(d => d.id !== danmaku.id);
+                    }, 8000);
+                },
+                
+                // 绘制棋盘
+                drawBoard() {
+                    console.log('开始绘制棋盘...');
+                    const canvas = this.$refs.boardCanvas;
+                    if (!canvas || !this.gameState || !this.gameState.board) {
+                        console.log('无法绘制：canvas或gameState数据不完整');
+                        return;
+                    }
+                    
+                    const ctx = canvas.getContext('2d');
+                    let board = this.gameState.board;
+                    
+                    console.log('棋盘数据:', board);
+                    console.log('Canvas尺寸:', canvas.width, canvas.height);
+                    console.log('棋盘参数:', {
+                        boardSize: this.boardSize,
+                        cellSize: this.cellSize,
+                        boardOffset: this.boardOffset
+                    });
+                    
+                    // 测试：检查棋盘数据是否存在
+                    if (!board || board.length === 0) {
+                        console.log('棋盘数据不存在，创建空棋盘...');
+                        // 创建空棋盘数据
+                        board = [];
+                        for (let i = 0; i < 15; i++) {
+                            board[i] = new Array(15).fill(0);
+                        }
+                        this.gameState.board = board;
+                        console.log('创建的棋盘数据:', board);
+                    }
+                    
+                    // 清空画布
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    // 绘制棋盘背景
+                    ctx.fillStyle = '#DEB887';
+                    ctx.fillRect(this.boardOffset - 10, this.boardOffset - 10, 
+                                this.cellSize * (this.boardSize - 1) + 20, 
+                                this.cellSize * (this.boardSize - 1) + 20);
+                    
+                    // 绘制网格线
+                    ctx.strokeStyle = '#8B4513';
+                    ctx.lineWidth = 1;
+                    
+                    for (let i = 0; i < this.boardSize; i++) {
+                        // 横线
+                        ctx.beginPath();
+                        ctx.moveTo(this.boardOffset, this.boardOffset + i * this.cellSize);
+                        ctx.lineTo(this.boardOffset + (this.boardSize - 1) * this.cellSize, 
+                                  this.boardOffset + i * this.cellSize);
+                        ctx.stroke();
+                        
+                        // 竖线
+                        ctx.beginPath();
+                        ctx.moveTo(this.boardOffset + i * this.cellSize, this.boardOffset);
+                        ctx.lineTo(this.boardOffset + i * this.cellSize, 
+                                  this.boardOffset + (this.boardSize - 1) * this.cellSize);
+                        ctx.stroke();
+                    }
+                    
+                    // 绘制棋子
+                    for (let row = 0; row < this.boardSize; row++) {
+                        for (let col = 0; col < this.boardSize; col++) {
+                            const piece = board[col][row];
+                            if (piece !== 0) {
+                                const x = this.boardOffset + col * this.cellSize;
+                                const y = this.boardOffset + row * this.cellSize;
+                                
+                                ctx.beginPath();
+                                ctx.arc(x, y, this.cellSize * 0.4, 0, Math.PI * 2);
+                                
+                                if (piece === 1) {
+                                    // 黑棋
+                                    const gradient = ctx.createRadialGradient(x - 5, y - 5, 0, x, y, this.cellSize * 0.4);
+                                    gradient.addColorStop(0, '#444');
+                                    gradient.addColorStop(1, '#000');
+                                    ctx.fillStyle = gradient;
+                                } else {
+                                    // 白棋
+                                    const gradient = ctx.createRadialGradient(x - 5, y - 5, 0, x, y, this.cellSize * 0.4);
+                                    gradient.addColorStop(0, '#fff');
+                                    gradient.addColorStop(1, '#ccc');
+                                    ctx.fillStyle = gradient;
+                                }
+                                
+                                ctx.fill();
+                                ctx.strokeStyle = piece === 1 ? '#000' : '#666';
+                                ctx.lineWidth = 1;
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                    
+                    // 标记最后一步
+                    if (this.gameState.last_move && this.gameState.last_move.x !== -1) {
+                        const lastX = this.boardOffset + this.gameState.last_move.x * this.cellSize;
+                        const lastY = this.boardOffset + this.gameState.last_move.y * this.cellSize;
+                        
+                        ctx.strokeStyle = '#FF0000';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.arc(lastX, lastY, this.cellSize * 0.2, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                },
+            },
+            mounted() {
+                this.connectWebSocket();
+                
+                // 定期刷新房间列表
+                setInterval(() => {
+                    if (!this.currentRoom) {
+                        this.loadRooms();
+                    }
+                }, 5000);
+            },
+            watch: {
+                gameState: {
+                    handler() {
+                        this.$nextTick(() => {
+                            if (this.gameState) {
+                                this.drawBoard();
+                            }
+                        });
+                    },
+                    deep: true
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

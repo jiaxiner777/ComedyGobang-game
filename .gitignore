@@ -2,7 +2,7 @@
 .gocache/
 .gotmp/
 .gomodcache/
-dist/
+/dist/
 node_modules/
 *.exe
 *.test
